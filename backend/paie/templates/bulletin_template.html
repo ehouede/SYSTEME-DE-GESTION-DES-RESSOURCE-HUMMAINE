@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>BULLETIN DE PAIE</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #333;
+            margin: 20px;
+        }
+        .container {
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #fff;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 2px solid #005a9c;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .company-details {
+            width: 50%;
+        }
+        .company-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #005a9c;
+        }
+        .doc-title {
+            text-align: right;
+            width: 50%;
+        }
+        .doc-title h1 {
+            margin: 0;
+            font-size: 20px;
+            color: #333;
+        }
+        .period {
+            font-size: 14px;
+            font-weight: bold;
+            color: #555;
+            margin-top: 5px;
+        }
+        .employee-info-box {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 12px;
+            border-radius: 4px;
+        }
+        .info-col {
+            width: 48%;
+        }
+        .info-row {
+            margin-bottom: 6px;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #666;
+            display: inline-block;
+            width: 120px;
+        }
+        .info-val {
+            color: #111;
+        }
+        table.payslip-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+        }
+        table.payslip-table th, table.payslip-table td {
+            border: 1px solid #dee2e6;
+            padding: 8px 10px;
+            text-align: left;
+        }
+        table.payslip-table th {
+            background-color: #005a9c;
+            color: #fff;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+        .text-right {
+            text-align: right !important;
+        }
+        .totals-row {
+            background-color: #f1f3f5;
+            font-weight: bold;
+        }
+        .net-box-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 30px;
+        }
+        .net-box {
+            border: 2px solid #005a9c;
+            background-color: #e6f2ff;
+            padding: 15px 25px;
+            border-radius: 4px;
+            text-align: right;
+        }
+        .net-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: #005a9c;
+            text-transform: uppercase;
+        }
+        .net-amount {
+            font-size: 22px;
+            font-weight: bold;
+            color: #002d50;
+            margin-top: 5px;
+        }
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .sig-block {
+            width: 45%;
+            text-align: center;
+        }
+        .sig-title {
+            font-weight: bold;
+            margin-bottom: 50px;
+            text-decoration: underline;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 10px;
+            color: #aaa;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <div class="company-details">
+                <div class="company-name">GRH Suite S.A.</div>
+                <div>Zone Résidentielle, Cotonou, Bénin</div>
+                <div>RCCM : RB/COT/26-B-12345 &bull; IFU : 3202612345678</div>
+                <div>Téléphone: +229 21 30 00 00</div>
+            </div>
+            <div class="doc-title">
+                <h1>BULLETIN DE PAIE</h1>
+                <div class="period">Période : {{ mois_nom }} {{ bulletin.annee }}</div>
+            </div>
+        </div>
+
+        <div class="employee-info-box">
+            <div class="info-col">
+                <div class="info-row">
+                    <span class="info-label">Matricule:</span>
+                    <span class="info-val"><strong>{{ employe.matricule }}</strong></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Nom & Prénoms:</span>
+                    <span class="info-val">{{ employe.user.first_name }} {{ employe.user.last_name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Adresse:</span>
+                    <span class="info-val">{{ employe.adresse }}</span>
+                </div>
+            </div>
+            <div class="info-col">
+                <div class="info-row">
+                    <span class="info-label">Poste occupé:</span>
+                    <span class="info-val">{{ employe.poste }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Service:</span>
+                    <span class="info-val">{{ employe.service.nom }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Date Embauche:</span>
+                    <span class="info-val">{{ employe.date_embauche|date:"d/m/Y" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">N° IFU Employé:</span>
+                    <span class="info-val">{{ employe.ifu|default:"-" }}</span>
+                </div>
+            </div>
+        </div>
+
+        <table class="payslip-table">
+            <thead>
+                <tr>
+                    <th style="width: 10%;">Code</th>
+                    <th style="width: 45%;">Désignation des Rubriques</th>
+                    <th style="width: 15%; text-align: right;">Base</th>
+                    <th style="width: 15%; text-align: right;">Gains (FCFA)</th>
+                    <th style="width: 15%; text-align: right;">Retenues (FCFA)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Gains -->
+                <tr>
+                    <td>100</td>
+                    <td>Salaire de base</td>
+                    <td class="text-right">-</td>
+                    <td class="text-right">{{ bulletin.salaire_base }}</td>
+                    <td class="text-right">-</td>
+                </tr>
+                <tr>
+                    <td>210</td>
+                    <td>Prime de transport</td>
+                    <td class="text-right">-</td>
+                    <td class="text-right">{{ bulletin.prime_transport }}</td>
+                    <td class="text-right">-</td>
+                </tr>
+                <tr>
+                    <td>220</td>
+                    <td>Prime d'ancienneté ({{ anciennete }} an(s))</td>
+                    <td class="text-right">{{ bulletin.salaire_base }}</td>
+                    <td class="text-right">{{ bulletin.prime_anciennete }}</td>
+                    <td class="text-right">-</td>
+                </tr>
+
+                <!-- Totaux intermédiaires pour clarté -->
+                <tr class="totals-row">
+                    <td>-</td>
+                    <td>TOTAL BRUT (A)</td>
+                    <td class="text-right">-</td>
+                    <td class="text-right">{{ bulletin.total_brut }}</td>
+                    <td class="text-right">-</td>
+                </tr>
+
+                <!-- Retenues -->
+                <tr>
+                    <td>400</td>
+                    <td>Cotisation CNSS Salariale (3,6%)</td>
+                    <td class="text-right">{{ bulletin.total_brut }}</td>
+                    <td class="text-right">-</td>
+                    <td class="text-right">{{ bulletin.cotisation_cnss_salariale }}</td>
+                </tr>
+
+                <!-- Totaux Retenues -->
+                <tr class="totals-row">
+                    <td>-</td>
+                    <td>TOTAL RETENUES (B)</td>
+                    <td class="text-right">-</td>
+                    <td class="text-right">-</td>
+                    <td class="text-right">{{ bulletin.cotisation_cnss_salariale }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Cotisations Patronales obligatoires pour info -->
+        <table class="payslip-table" style="font-size: 10px; margin-bottom: 20px;">
+            <thead>
+                <tr>
+                    <th style="background-color: #6c757d;">Cotisations Patronales (Pour information)</th>
+                    <th style="background-color: #6c757d; text-align: right; width: 25%;">Base</th>
+                    <th style="background-color: #6c757d; text-align: right; width: 25%;">Part Patronale (6,4%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Sécurité Sociale (CNSS Part Patronale)</td>
+                    <td class="text-right">{{ bulletin.total_brut }}</td>
+                    <td class="text-right">{{ bulletin.cotisation_cnss_patronale }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="net-box-container">
+            <div class="net-box">
+                <div class="net-title">Net à Payer</div>
+                <div class="net-amount">{{ bulletin.net_a_payer }} FCFA</div>
+            </div>
+        </div>
+
+        <div class="signatures">
+            <div class="sig-block">
+                <div class="sig-title">Signature de l'Employeur</div>
+                <div>Diane Royer, Responsable RH</div>
+            </div>
+            <div class="sig-block">
+                <div class="sig-title">Signature du Salarié</div>
+                <div style="font-size: 10px; color: #777;">(précédée de la mention "Reçu le bulletin")</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Généré automatiquement le {{ bulletin.date_generation|date:"d/m/Y H:i:s" }} par GRH Suite.
+            Pour faire valoir ce que de droit.
+        </div>
+    </div>
+
+</body>
+</html>
