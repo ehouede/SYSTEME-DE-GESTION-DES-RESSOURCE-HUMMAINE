@@ -90,6 +90,12 @@ class Command(BaseCommand):
                             manager = getattr(getattr(emp, 'service', None), 'manager', None)
                             if manager:
                                 Notification.objects.create(destinataire=manager, message=message)
+                            # Notify the employee themselves
+                            try:
+                                if getattr(emp, 'user', None):
+                                    Notification.objects.create(destinataire=emp.user, message=f"Vous êtes marqué(e) absent(e) le {cur}.")
+                            except Exception:
+                                pass
                             rh_users = User.objects.filter(role__in=['RH', 'ADMIN'])
                             for u in rh_users:
                                 Notification.objects.create(destinataire=u, message=message)

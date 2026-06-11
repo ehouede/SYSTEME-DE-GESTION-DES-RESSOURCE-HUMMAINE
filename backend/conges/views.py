@@ -95,6 +95,13 @@ class DemandeCongeViewSet(viewsets.ModelViewSet):
             rh_users = User.objects.filter(role__in=['RH', 'ADMIN'])
             for u in rh_users:
                 Notification.objects.create(destinataire=u, message=message)
+            # Notify the employee who submitted
+            try:
+                employe_user = getattr(demande.employe, 'user', None)
+                if employe_user:
+                    Notification.objects.create(destinataire=employe_user, message=f"Votre demande de congé du {demande.date_debut} au {demande.date_fin} a bien été soumise.")
+            except Exception:
+                pass
         except Exception:
             # Avoid breaking the soumettre flow if notification creation fails
             pass

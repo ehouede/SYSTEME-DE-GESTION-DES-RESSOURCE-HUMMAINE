@@ -179,11 +179,7 @@ const AppContent = () => {
                   }}
                 />
               </button>
-              {currentUser && currentUser.role === "EMPLOYE" && (
-                <button className="btn btn-primary" onClick={() => setModalOpen(true)}>
-                  <i className="ti ti-plus"></i> Nouvelle demande
-                </button>
-              )}
+              {/* "Nouvelle demande" button removed */}
               {/* Theme toggle removed */}
               <div className="avatar" style={{ width: 34, height: 34 }}>DR</div>
             </div>

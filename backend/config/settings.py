@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from datetime import timedelta
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -154,6 +155,14 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
+
+# Celery Beat schedule: mark absences daily at 18:30 local time
+CELERY_BEAT_SCHEDULE = {
+    'mark-absences-daily-1830': {
+        'task': 'pointage.tasks.mark_absences_task',
+        'schedule': crontab(hour=18, minute=30),
+    },
+}
 
 # Configuration de l'envoi d'emails (Console en développement)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
