@@ -1,7 +1,7 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db import transaction
+from django.db import transaction, models
 from .models import TypeConge, SoldeConge, DemandeConge
 from .serializers import TypeCongeSerializer, SoldeCongeSerializer, DemandeCongeSerializer
 from accounts.permissions import EstRH, EstManagerOuPlus, EstProprietaireOuRH
@@ -11,6 +11,9 @@ class TypeCongeViewSet(viewsets.ModelViewSet):
     serializer_class = TypeCongeSerializer
     
     def get_permissions(self):
+        # Allow anonymous read access to types (useful for public frontend forms)
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return [permissions.IsAuthenticated(), EstRH()]
         return [permissions.IsAuthenticated()]
@@ -33,8 +36,6 @@ class SoldeCongeViewSet(viewsets.ModelViewSet):
             return SoldeConge.objects.filter(employe__user=user)
         except AttributeError:
             return SoldeConge.objects.none()
-
-from django.db import models  # S'assurer d'importer models pour Q
 
 class DemandeCongeViewSet(viewsets.ModelViewSet):
     serializer_class = DemandeCongeSerializer

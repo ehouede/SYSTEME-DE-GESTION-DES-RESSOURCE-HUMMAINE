@@ -49,8 +49,9 @@ class EmployeSerializer(serializers.ModelSerializer):
         if user_data:
             user = instance.user
             for attr, value in user_data.items():
-                # On ne permet pas de modifier le rôle via EmployeSerializer ou si on le permet, on le fait avec précaution
-                if attr in ['email', 'first_name', 'last_name', 'role', 'telephone']:
+                # On ne permet pas de modifier le rôle via EmployeSerializer
+                # Utilisez l'endpoint /api/accounts/users/{id}/change_role/ pour modifier le rôle
+                if attr in ['email', 'first_name', 'last_name', 'telephone']:
                     setattr(user, attr, value)
             user.save()
         return super().update(instance, validated_data)

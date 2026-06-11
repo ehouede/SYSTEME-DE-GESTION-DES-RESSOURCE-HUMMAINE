@@ -7,5 +7,5 @@ class PointageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Pointage
-        fields = ('id', 'employe', 'employe_name', 'date', 'heure_arrivee', 'heure_depart', 'statut', 'statut_display')
+        fields = ('id', 'employe', 'employe_name', 'date', 'heure_arrivee', 'heure_depart', 'statut', 'statut_display', 'justifie')
         read_only_fields = ('employe', 'date', 'statut')

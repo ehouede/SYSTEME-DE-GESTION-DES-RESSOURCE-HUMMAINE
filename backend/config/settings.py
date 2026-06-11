@@ -6,12 +6,14 @@ from datetime import timedelta
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-@#$sgrh-benin-key-!@#1234567890'
+# Load sensitive settings from environment variables where possible.
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-please-set-a-real-secret')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['*']
+# Allow configuring hosts via environment variable (comma-separated). Default to localhost for safety.
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 # Application definition
 INSTALLED_APPS = [

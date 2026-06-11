@@ -1,15 +1,21 @@
 import os
+import logging
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
+
+logger = logging.getLogger(__name__)
 
 try:
     from weasyprint import HTML
     WEASYPRINT_AVAILABLE = True
 except Exception as e:
     WEASYPRINT_AVAILABLE = False
-    import warnings
-    warnings.warn(f"WeasyPrint n'est pas disponible ou GTK+ est manquant. Un fallback HTML sera utilisé. Détail : {e}")
+    # Log a single warning with actionable guidance instead of raising a repeated warning
+    logger.warning(
+        "WeasyPrint non disponible ou dépendances natives manquantes. Un fallback HTML sera utilisé. "
+        "Pour générer des PDF natifs, installez WeasyPrint et ses dépendances système: https://doc.courtbouillon.org/weasyprint/stable/first_steps.html"
+    )
 
 def generer_contrat_pdf(employe, contrat):
     """

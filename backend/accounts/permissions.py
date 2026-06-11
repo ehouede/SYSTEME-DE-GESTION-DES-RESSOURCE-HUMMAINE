@@ -8,6 +8,22 @@ class EstRH(permissions.BasePermission):
         return request.user.is_authenticated and getattr(request.user, 'role', None) == 'RH'
 
 
+class EstAdmin(permissions.BasePermission):
+    """Allow access only to users with role 'ADMIN' (Administrator)."""
+
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and getattr(request.user, 'role', None) == 'ADMIN'
+
+
+class EstAdminOuRH(permissions.BasePermission):
+    """Allow access to users with role 'ADMIN' or 'RH' (Administrator or Human Resources)."""
+
+    allowed_roles = {'ADMIN', 'RH'}
+
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and getattr(request.user, 'role', None) in self.allowed_roles
+
+
 class EstManagerOuPlus(permissions.BasePermission):
     """Allow access to users with role 'MANAGER' or higher (e.g., 'RH', 'ADMIN')."""
 

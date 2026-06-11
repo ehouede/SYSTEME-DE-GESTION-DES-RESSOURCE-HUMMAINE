@@ -14,9 +14,9 @@ class PointageViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.role in ['RH', 'ADMIN', 'MANAGER']:
-            return Pointage.objects.all()
+            return Pointage.objects.select_related('employe', 'employe__user').all()
         # L'employé voit uniquement ses propres pointages
-        return Pointage.objects.filter(employe__user=user)
+        return Pointage.objects.select_related('employe', 'employe__user').filter(employe__user=user)
 
     @action(detail=False, methods=['post'], url_path='pointer')
     def pointer(self, request):

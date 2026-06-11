@@ -10,7 +10,7 @@ from .serializers import (
     EmployeCreateSerializer, 
     ContratSerializer
 )
-from accounts.permissions import EstRH, EstManagerOuPlus, EstProprietaireOuRH
+from accounts.permissions import EstRH, EstManagerOuPlus, EstProprietaireOuRH, EstAdminOuRH
 
 class ServiceViewSet(viewsets.ModelViewSet):
     queryset = Service.objects.all()
@@ -22,7 +22,8 @@ class ServiceViewSet(viewsets.ModelViewSet):
         return [permissions.IsAuthenticated()]
 
 class EmployeViewSet(viewsets.ModelViewSet):
-    queryset = Employe.objects.all()
+    # Select related user and service and prefetch contrats to avoid N+1 queries in serializers
+    queryset = Employe.objects.select_related('user', 'service').prefetch_related('contrats').all()
     
     def get_serializer_class(self):
         if self.action == 'create':
@@ -33,15 +34,15 @@ class EmployeViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             return [permissions.IsAuthenticated()]
         if self.action == 'destroy':
-            return [permissions.IsAuthenticated(), EstRH()]
+            return [permissions.IsAuthenticated(), EstAdminOuRH()]
         return [permissions.IsAuthenticated(), EstProprietaireOuRH()]
 
     def get_queryset(self):
         user = self.request.user
         if user.role in ['RH', 'ADMIN']:
-            return Employe.objects.all()
+            return Employe.objects.select_related('user', 'service').prefetch_related('contrats').all()
         # Les employés ne voient que leur propre fiche
-        return Employe.objects.filter(user=user)
+        return Employe.objects.select_related('user', 'service').prefetch_related('contrats').filter(user=user)
 
     @action(detail=True, methods=['get'], url_path='contrat_pdf')
     def contrat_pdf(self, request, pk=None):

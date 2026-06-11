@@ -17,6 +17,7 @@ class Pointage(models.Model):
     heure_arrivee = models.TimeField(null=True, blank=True)
     heure_depart = models.TimeField(null=True, blank=True)
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='ABSENT')
+    justifie = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('employe', 'date')

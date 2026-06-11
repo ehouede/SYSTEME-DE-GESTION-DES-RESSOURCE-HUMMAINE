@@ -2,14 +2,24 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 User = get_user_model()
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for user profile information."""
+    role_display = serializers.CharField(source='get_role_display', read_only=True)
+    
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'role', 'telephone')
-        read_only_fields = ('id', 'username')
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'role', 'role_display', 'telephone')
+        read_only_fields = ('id', 'username', 'role_display')
 
-User = get_user_model()
+class ChangeRoleSerializer(serializers.ModelSerializer):
+    """Serializer for changing user role. Only accessible to ADMIN."""
+    role_display = serializers.CharField(source='get_role_display', read_only=True)
+    
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'role', 'role_display')
+        read_only_fields = ('id', 'username', 'email', 'first_name', 'last_name', 'role_display')
 
 
 class RegisterSerializer(serializers.ModelSerializer):
