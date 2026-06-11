@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 
 from personnel.models import Employe
 from pointage.models import Pointage
+from notifications.models import Notification
+from django.contrib.auth import get_user_model
 
 class Command(BaseCommand):
     help = 'Mark employees without a pointage for a given date as absent (non justified)'
@@ -33,6 +35,15 @@ class Command(BaseCommand):
         if start_date > end_date:
             self.stderr.write('Start date must be <= end date')
             return
+
+        # If no explicit start/end provided and we're processing today,
+        # only run the marking for today when local time is at or after 18:30.
+        if not start_str and not end_str and start_date == timezone.localdate():
+            now = timezone.localtime()
+            cutoff = now.replace(hour=18, minute=30, second=0, microsecond=0)
+            if now < cutoff:
+                self.stdout.write('It is before 18:30 local time; skipping absence marking for today.')
+                return
 
         self.stdout.write(f'Processing absences from {start_date} to {end_date}')
 
@@ -72,6 +83,18 @@ class Command(BaseCommand):
                         p = Pointage(employe=emp, date=cur, heure_arrivee=None, heure_depart=None, statut='ABSENT', justifie=False)
                         p.save()
                         created += 1
+                        # Create notifications for manager and RH/Admin to signal the absence
+                        try:
+                            User = get_user_model()
+                            message = f"{emp} est absent le {cur}."
+                            manager = getattr(getattr(emp, 'service', None), 'manager', None)
+                            if manager:
+                                Notification.objects.create(destinataire=manager, message=message)
+                            rh_users = User.objects.filter(role__in=['RH', 'ADMIN'])
+                            for u in rh_users:
+                                Notification.objects.create(destinataire=u, message=message)
+                        except Exception:
+                            pass
                 cur = cur + timedelta(days=1)
 
         self.stdout.write(self.style.SUCCESS(

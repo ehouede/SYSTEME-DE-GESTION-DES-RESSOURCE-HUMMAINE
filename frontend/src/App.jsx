@@ -184,14 +184,7 @@ const AppContent = () => {
                   <i className="ti ti-plus"></i> Nouvelle demande
                 </button>
               )}
-              {/* Theme toggle button */}
-              <button
-                className="btn btn-sm"
-                title={theme === 'light' ? 'Activer le thème sombre' : 'Activer le thème clair'}
-                onClick={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
-              >
-                <i className={theme === 'light' ? 'ti ti-moon' : 'ti ti-sun'} style={{ fontSize: 16 }}></i>
-              </button>
+              {/* Theme toggle removed */}
               <div className="avatar" style={{ width: 34, height: 34 }}>DR</div>
             </div>
           </div>

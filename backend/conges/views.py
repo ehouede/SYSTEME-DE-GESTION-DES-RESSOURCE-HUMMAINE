@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from django.db import transaction, models
 from .models import TypeConge, SoldeConge, DemandeConge
 from .serializers import TypeCongeSerializer, SoldeCongeSerializer, DemandeCongeSerializer
+from notifications.models import Notification
+from django.contrib.auth import get_user_model
 from accounts.permissions import EstRH, EstManagerOuPlus, EstProprietaireOuRH
 
 class TypeCongeViewSet(viewsets.ModelViewSet):
@@ -81,6 +83,21 @@ class DemandeCongeViewSet(viewsets.ModelViewSet):
             
         demande.statut = 'SOUMIS'
         demande.save()
+        # Create notifications for the manager and HR/ADMIN users
+        try:
+            User = get_user_model()
+            message = f"Nouvelle demande de congé de {demande.employe} du {demande.date_debut} au {demande.date_fin}."
+            # Notify service manager
+            manager = getattr(getattr(demande.employe, 'service', None), 'manager', None)
+            if manager:
+                Notification.objects.create(destinataire=manager, message=message)
+            # Notify all RH and ADMIN users
+            rh_users = User.objects.filter(role__in=['RH', 'ADMIN'])
+            for u in rh_users:
+                Notification.objects.create(destinataire=u, message=message)
+        except Exception:
+            # Avoid breaking the soumettre flow if notification creation fails
+            pass
         return Response(
             {"detail": "Demande soumise avec succès !", "demande": DemandeCongeSerializer(demande).data}, 
             status=status.HTTP_200_OK
