@@ -84,6 +84,10 @@ export default function Sidebar() {
     };
 
     fetchCounts();
+    // Rafraîchir les comptages toutes les 30 secondes
+    const interval = setInterval(fetchCounts, 30000);
+    
+    return () => clearInterval(interval);
   }, [currentUser]);
 
   const userRole = currentUser?.role;
@@ -105,7 +109,7 @@ export default function Sidebar() {
     <aside className="sidebar">
       <div className="sidebar-logo">
         <div className="logo-text">
-          <i className="ti ti-building-community" style={{ color: "var(--color-text-info)" }}></i> GRH Suite
+          <i className="ti ti-building-community" style={{ color: "var(--color-text-info)" }}></i> BENIN-SERVICE SAS
         </div>
         <div className="logo-sub">Gestion des ressources humaines</div>
       </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Table, Typography, message, Modal, Form, Input, Select, DatePicker, Button, Popconfirm, Tag, Space } from "antd";
+import { Table, Typography, message, Modal, Form, Input, Select, DatePicker, Button, Popconfirm, Tag, Space, Alert, Statistic, Row, Col } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined, CheckOutlined, CloseOutlined, SendOutlined } from "@ant-design/icons";
 import api from "../api";
 import moment from "moment";
@@ -13,6 +13,9 @@ export default function Conges() {
   const [modalVisible, setModalVisible] = useState(false);
   const [editing, setEditing] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [soldes, setSoldes] = useState({});
+  const [selectedType, setSelectedType] = useState(null);
+  const [daysCount, setDaysCount] = useState(0);
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -45,13 +48,29 @@ export default function Conges() {
     }
   };
 
+  const fetchSoldes = async () => {
+    try {
+      const res = await api.get("/conges/soldes/");
+      const soldesMap = {};
+      res.data.forEach(s => {
+        soldesMap[s.type_conge] = s;
+      });
+      setSoldes(soldesMap);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     fetchData();
     fetchTypes();
+    fetchSoldes();
   }, []);
 
   const openAdd = () => {
     setEditing(null);
+    setSelectedType(null);
+    setDaysCount(0);
     form.resetFields();
     setModalVisible(true);
   };
@@ -76,6 +95,26 @@ export default function Conges() {
       console.error(err);
       message.error("Erreur lors de la suppression");
     }
+  };
+
+  const handleTypeChange = (typeId) => {
+    setSelectedType(typeId);
+    calculateDays();
+  };
+
+  const calculateDays = () => {
+    const dateDeb = form.getFieldValue("date_debut");
+    const dateFin = form.getFieldValue("date_fin");
+    if (dateDeb && dateFin && dateFin.isSameOrAfter(dateDeb)) {
+      const jours = dateFin.diff(dateDeb, "days") + 1;
+      setDaysCount(jours);
+    } else {
+      setDaysCount(0);
+    }
+  };
+
+  const handleDatesChange = () => {
+    calculateDays();
   };
 
   const handleSoumettre = async id => {
@@ -301,27 +340,123 @@ export default function Conges() {
         onCancel={() => setModalVisible(false)} 
         footer={null} 
         destroyOnClose
+        width={600}
       >
-        <Form form={form} layout="vertical" onFinish={handleSubmit}>
-          <Form.Item name="type_conge" label="Type de congé" rules={[{ required: true, message: "Sélectionnez le type !" }]}>
-            <Select placeholder="Choisir le motif de congé">
+        <Form 
+          form={form} 
+          layout="vertical" 
+          onFinish={handleSubmit}
+          requiredMark="optional"
+        >
+          <Form.Item 
+            name="type_conge" 
+            label="Type de congé *" 
+            rules={[{ required: true, message: "Sélectionnez le type de congé!" }]}
+          >
+            <Select 
+              placeholder="Choisir le motif de congé"
+              onChange={handleTypeChange}
+            >
               {leaveTypes.map(t => (
-                <Select.Option key={t.id} value={t.id}>{t.nom} ({t.code} - max {t.duree_standard}j)</Select.Option>
+                <Select.Option key={t.id} value={t.id}>
+                  {t.nom} ({t.code} - max {t.duree_standard}j)
+                </Select.Option>
               ))}
             </Select>
           </Form.Item>
-          <Form.Item name="date_debut" label="Date de début" rules={[{ required: true, message: "Date requise !" }]}>
-            <DatePicker style={{ width: "100%" }} />
+
+          {selectedType && soldes[selectedType] && (
+            <Alert
+              message={`Solde disponible : ${soldes[selectedType].jours_restants} jours`}
+              type={soldes[selectedType].jours_restants > 0 ? "success" : "error"}
+              showIcon
+              style={{ marginBottom: 16 }}
+            />
+          )}
+
+          <Form.Item 
+            name="date_debut" 
+            label="Date de début *" 
+            rules={[{ required: true, message: "La date de début est requise!" }]}
+          >
+            <DatePicker 
+              style={{ width: "100%" }}
+              onChange={handleDatesChange}
+              disabledDate={(current) => current && current < moment().startOf('day')}
+              format="DD/MM/YYYY"
+              placeholder="Sélectionnez une date"
+            />
           </Form.Item>
-          <Form.Item name="date_fin" label="Date de fin" rules={[{ required: true, message: "Date requise !" }]}>
-            <DatePicker style={{ width: "100%" }} />
+
+          <Form.Item 
+            name="date_fin" 
+            label="Date de fin *" 
+            rules={[
+              { required: true, message: "La date de fin est requise!" },
+              {
+                validator: (_, value) => {
+                  const dateDeb = form.getFieldValue("date_debut");
+                  if (dateDeb && value && value.isBefore(dateDeb)) {
+                    return Promise.reject(new Error("La date de fin doit être >= à la date de début"));
+                  }
+                  return Promise.resolve();
+                }
+              }
+            ]}
+          >
+            <DatePicker 
+              style={{ width: "100%" }}
+              onChange={handleDatesChange}
+              disabledDate={(current) => current && current < moment().startOf('day')}
+              format="DD/MM/YYYY"
+              placeholder="Sélectionnez une date"
+            />
           </Form.Item>
-          <Form.Item name="motif" label="Motif / Commentaire" rules={[{ required: false }]}>
-            <Input.TextArea rows={3} placeholder="Justifiez votre demande..." />
+
+          {daysCount > 0 && (
+            <Row gutter={16} style={{ marginBottom: 16 }}>
+              <Col span={12}>
+                <Statistic 
+                  title="Jours demandés" 
+                  value={daysCount}
+                  prefix="📅"
+                />
+              </Col>
+              <Col span={12}>
+                <Statistic 
+                  title="Solde restant" 
+                  value={selectedType && soldes[selectedType] ? Math.max(0, soldes[selectedType].jours_restants - daysCount) : "-"}
+                  valueStyle={{ 
+                    color: selectedType && soldes[selectedType] && (soldes[selectedType].jours_restants - daysCount) < 0 ? '#ff4d4f' : '#52c41a'
+                  }}
+                />
+              </Col>
+            </Row>
+          )}
+
+          <Form.Item name="motif" label="Motif / Commentaire">
+            <Input.TextArea 
+              rows={3} 
+              placeholder="Justifiez votre demande... (optionnel)" 
+            />
           </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" block size="large">
-              {editing ? "Mettre à jour" : "Créer le brouillon"}
+
+          <Form.Item style={{ marginBottom: 0 }}>
+            <Button 
+              type="primary" 
+              htmlType="submit" 
+              block 
+              size="large"
+              style={{
+                backgroundColor: "#1890ff",
+                borderColor: "#1890ff",
+                color: "#fff",
+                fontSize: "16px",
+                fontWeight: "600",
+                height: "45px"
+              }}
+            >
+              {editing ? "✓ Mettre à jour" : "✓ Créer le brouillon"}
             </Button>
           </Form.Item>
         </Form>

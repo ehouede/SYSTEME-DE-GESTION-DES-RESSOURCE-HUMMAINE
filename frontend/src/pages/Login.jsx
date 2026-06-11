@@ -57,7 +57,7 @@ export default function Login() {
       >
         <div style={{ textAlign: "center", marginBottom: "30px" }}>
           <Title level={2} style={{ color: "#fff", margin: 0, fontWeight: "700" }}>
-            SGRH
+            BENIN-SERVICE SAS
           </Title>
           <Text style={{ color: "rgba(255, 255, 255, 0.65)" }}>
             Système de Gestion des Ressources Humaines

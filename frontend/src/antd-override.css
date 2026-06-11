@@ -1,0 +1,267 @@
+/* Force dark theme on Ant Design components */
+
+/* Universal text color */
+* {
+  color: #f8fafc !important;
+}
+
+p, span, div, a, button, label, h1, h2, h3, h4, h5, h6, td, th, li {
+  color: #f8fafc !important;
+}
+
+/* Card */
+.ant-card {
+  background: #111827 !important;
+  border-color: rgba(148, 163, 184, 0.2) !important;
+  color: #f8fafc !important;
+}
+
+.ant-card-head {
+  background: transparent !important;
+  border-bottom-color: rgba(148, 163, 184, 0.2) !important;
+}
+
+.ant-card-head-title {
+  color: #f8fafc !important;
+}
+
+.ant-card-body {
+  background: transparent !important;
+  color: #f8fafc !important;
+}
+
+/* Table */
+.ant-table {
+  background: transparent !important;
+  color: #f8fafc !important;
+}
+
+.ant-table-wrapper .ant-table-thead > tr > th {
+  background: transparent !important;
+  border-bottom-color: rgba(148, 163, 184, 0.2) !important;
+  color: #94a3b8 !important;
+}
+
+.ant-table-wrapper .ant-table-tbody > tr {
+  background: transparent !important;
+}
+
+.ant-table-wrapper .ant-table-tbody > tr > td {
+  border-bottom-color: rgba(148, 163, 184, 0.2) !important;
+  color: #f8fafc !important;
+}
+
+.ant-table-wrapper .ant-table-tbody > tr:hover > td {
+  background: #1f2937 !important;
+}
+
+/* Statistic */
+.ant-statistic-title {
+  color: #94a3b8 !important;
+}
+
+.ant-statistic-content {
+  color: #f8fafc !important;
+}
+
+.ant-statistic-content-value {
+  color: #f8fafc !important;
+}
+
+/* List */
+.ant-list {
+  background: transparent !important;
+  color: #f8fafc !important;
+}
+
+.ant-list-item {
+  border-bottom-color: rgba(148, 163, 184, 0.2) !important;
+  background: transparent !important;
+}
+
+.ant-list-item:last-child {
+  border-bottom: none !important;
+}
+
+.ant-list-item-meta-title {
+  color: #f8fafc !important;
+}
+
+.ant-list-item-meta-description {
+  color: #94a3b8 !important;
+}
+
+/* Typography */
+.ant-typography {
+  color: #f8fafc !important;
+}
+
+/* Input */
+.ant-input,
+.ant-input-number,
+.ant-select-selector,
+.ant-picker {
+  background: #1f2937 !important;
+  border-color: rgba(148, 163, 184, 0.35) !important;
+  color: #f8fafc !important;
+}
+
+.ant-input::placeholder {
+  color: #94a3b8 !important;
+}
+
+.ant-input:hover {
+  border-color: rgba(148, 163, 184, 0.5) !important;
+}
+
+.ant-input:focus {
+  border-color: #60a5fa !important;
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2) !important;
+}
+
+/* Select */
+.ant-select-selector {
+  background: #1f2937 !important;
+  border-color: rgba(148, 163, 184, 0.35) !important;
+}
+
+.ant-select-selector input {
+  color: #f8fafc !important;
+}
+
+.ant-select-clear {
+  color: #94a3b8 !important;
+}
+
+.ant-select-arrow {
+  color: #94a3b8 !important;
+}
+
+/* Dropdown */
+.ant-dropdown-menu {
+  background: #111827 !important;
+  color: #f8fafc !important;
+}
+
+.ant-dropdown-menu-item {
+  color: #f8fafc !important;
+}
+
+.ant-dropdown-menu-item:hover {
+  background: #1f2937 !important;
+  color: #60a5fa !important;
+}
+
+/* Spin */
+.ant-spin-text {
+  color: #f8fafc !important;
+}
+
+.ant-spin-spinning {
+  color: #60a5fa !important;
+}
+
+/* Empty */
+.ant-empty-description {
+  color: #94a3b8 !important;
+}
+
+/* Modal */
+.ant-modal-content {
+  background: #111827 !important;
+  color: #f8fafc !important;
+}
+
+.ant-modal-header {
+  background: transparent !important;
+  border-bottom-color: rgba(148, 163, 184, 0.2) !important;
+}
+
+.ant-modal-title {
+  color: #f8fafc !important;
+}
+
+.ant-modal-close-x {
+  color: #94a3b8 !important;
+}
+
+/* Button */
+.ant-btn {
+  color: #f8fafc !important;
+  border-color: rgba(148, 163, 184, 0.35) !important;
+}
+
+.ant-btn:hover {
+  color: #60a5fa !important;
+  border-color: #60a5fa !important;
+}
+
+/* Use theme action variables from global.css when available */
+.ant-btn-primary {
+  background: var(--color-action-success, #5A67D8) !important;
+  border-color: var(--color-action-success, #5A67D8) !important;
+}
+
+.ant-btn-primary:hover {
+  background: var(--color-action-success, #5A67D8) !important;
+  border-color: var(--color-action-success, #5A67D8) !important;
+}
+
+/* Destructive (danger) button use action variable */
+.ant-btn-danger,
+.ant-btn-dangerous {
+  background: var(--color-action-danger, #ff4d4f) !important;
+  border-color: var(--color-action-danger, #ff4d4f) !important;
+  color: #fff !important;
+}
+
+.ant-btn-danger:hover,
+.ant-btn-dangerous:hover {
+  background: var(--color-action-danger, #ff4d4f) !important;
+  border-color: var(--color-action-danger, #ff4d4f) !important;
+}
+
+/* Tag */
+.ant-tag {
+  background: rgba(96, 165, 250, 0.12) !important;
+  border-color: rgba(96, 165, 250, 0.3) !important;
+  color: #60a5fa !important;
+}
+
+/* Pagination */
+.ant-pagination-item {
+  background: transparent !important;
+  border-color: rgba(148, 163, 184, 0.2) !important;
+}
+
+.ant-pagination-item a {
+  color: #f8fafc !important;
+}
+
+.ant-pagination-item-active {
+  background: #5A67D8 !important;
+  border-color: #5A67D8 !important;
+}
+
+.ant-pagination-item-active a {
+  color: #f8fafc !important;
+}
+
+/* Tooltip */
+.ant-tooltip-inner {
+  background: rgba(0, 0, 0, 0.85) !important;
+  color: #f8fafc !important;
+}
+
+/* Message & Notification */
+.ant-message-notice-content {
+  background: #1f2937 !important;
+  color: #f8fafc !important;
+  box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.48) !important;
+}
+
+.ant-notification-notice {
+  background: #111827 !important;
+  color: #f8fafc !important;
+  border-color: rgba(148, 163, 184, 0.2) !important;
+}

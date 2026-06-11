@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Row, Col, Card, Statistic, Table, Tag, Spin, message, Typography, List } from "antd";
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import moment from "moment";
 import api from "../api";
 
 const { Title, Text } = Typography;
+
+const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7c7c", "#a4de6c", "#d084d0"];
 
 const statusColorMap = {
   BROUILLON: "default",
@@ -194,70 +197,77 @@ export default function Stats() {
 
       <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
         <Col xs={24} lg={12}>
-          <Card title="Par département" className="glass-card">
-            <List
-              itemLayout="horizontal"
-              dataSource={departmentData}
-              renderItem={(item) => (
-                <List.Item>
-                  <List.Item.Meta
-                    title={<Text style={{ color: "#fff" }}>{item.department}</Text>}
-                    description={<Text type="secondary">{item.days}j</Text>}
-                  />
-                </List.Item>
-              )}
-            />
+          <Card title="Absentéisme mensuel" className="glass-card">
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={monthlyAbsences}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                <XAxis dataKey="month" stroke="rgba(255,255,255,0.5)" />
+                <YAxis stroke="rgba(255,255,255,0.5)" />
+                <Tooltip contentStyle={{ background: "rgba(0,0,0,0.8)", border: "none", borderRadius: 8 }} />
+                <Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={2} dot={{ fill: "#8884d8" }} />
+              </LineChart>
+            </ResponsiveContainer>
           </Card>
         </Col>
         <Col xs={24} lg={12}>
-          <Card title="Par type de congé" className="glass-card">
-            <Table
-              columns={[
-                { title: "Type", dataIndex: "type", key: "type" },
-                { title: "Demandes", dataIndex: "count", key: "count" },
-              ]}
-              dataSource={typeData}
-              pagination={false}
-              rowKey="key"
-              bordered
-              className="glass-card"
-              style={{ background: "transparent" }}
-            />
+          <Card title="Demandes par statut" className="glass-card">
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie data={statusData} cx="50%" cy="50%" labelLine={false} label={({ type, count }) => `${type}: ${count}`} outerRadius={80} fill="#8884d8" dataKey="count">
+                  {statusData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
           </Card>
         </Col>
       </Row>
 
       <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
         <Col xs={24} lg={12}>
-          <Card title="Solde de congés par employé" className="glass-card">
-            <List
-              itemLayout="horizontal"
-              dataSource={employeeBalanceRows}
-              renderItem={(item) => (
-                <List.Item>
-                  <List.Item.Meta
-                    title={<Text style={{ color: "#fff" }}>{item.name}</Text>}
-                    description={<Text type="secondary">{Math.round(item.taken)}/{Math.round(item.total)}j</Text>}
-                  />
-                </List.Item>
-              )}
-            />
+          <Card title="Demandes par type de congé" className="glass-card">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={typeData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                <XAxis dataKey="type" stroke="rgba(255,255,255,0.5)" />
+                <YAxis stroke="rgba(255,255,255,0.5)" />
+                <Tooltip contentStyle={{ background: "rgba(0,0,0,0.8)", border: "none", borderRadius: 8 }} />
+                <Bar dataKey="count" fill="#82ca9d" />
+              </BarChart>
+            </ResponsiveContainer>
           </Card>
         </Col>
         <Col xs={24} lg={12}>
-          <Card title="Absentéisme mensuel" className="glass-card">
-            <List
-              itemLayout="horizontal"
-              dataSource={monthlyAbsences.slice(0, 6)}
-              renderItem={(item) => (
-                <List.Item>
-                  <List.Item.Meta
-                    title={<Text style={{ color: "#fff" }}>{item.month}</Text>}
-                    description={<Text type="secondary">{item.value}j</Text>}
-                  />
-                </List.Item>
-              )}
-            />
+          <Card title="Solde de congés par employé (top 8)" className="glass-card">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={employeeBalanceRows}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                <XAxis dataKey="name" stroke="rgba(255,255,255,0.5)" angle={-45} textAnchor="end" height={80} />
+                <YAxis stroke="rgba(255,255,255,0.5)" />
+                <Tooltip contentStyle={{ background: "rgba(0,0,0,0.8)", border: "none", borderRadius: 8 }} />
+                <Legend />
+                <Bar dataKey="taken" fill="#ff7c7c" name="Jours pris" />
+                <Bar dataKey="total" fill="#ffc658" name="Jours acquis" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+        </Col>
+      </Row>
+
+      <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
+        <Col xs={24}>
+          <Card title="Jours pris par département" className="glass-card">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={departmentData} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                <XAxis type="number" stroke="rgba(255,255,255,0.5)" />
+                <YAxis dataKey="department" type="category" stroke="rgba(255,255,255,0.5)" width={150} />
+                <Tooltip contentStyle={{ background: "rgba(0,0,0,0.8)", border: "none", borderRadius: 8 }} />
+                <Bar dataKey="days" fill="#a4de6c" name="Jours" />
+              </BarChart>
+            </ResponsiveContainer>
           </Card>
         </Col>
       </Row>

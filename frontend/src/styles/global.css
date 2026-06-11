@@ -3,6 +3,7 @@
 
 :root {
   --font-sans: 'Inter', sans-serif;
+  --bg-gradient: linear-gradient(135deg, #0f172a 0%, #111827 100%);
   --color-background-primary: #111827;
   --color-background-secondary: #1f2937;
   --color-background-tertiary: #0f172a;
@@ -15,12 +16,37 @@
   --color-text-success: #4ade80;
   --color-text-warning: #facc15;
   --color-text-danger: #fb7185;
+  --color-action-danger: #c53030; /* confirmation destructive */
+  --color-action-success: #2f855a; /* confirmation positive */
+  --color-action-cancel: rgba(255,255,255,0.04); /* cancel / neutral */
   --color-background-info: rgba(96, 165, 250, 0.12);
   --color-background-success: rgba(74, 222, 128, 0.12);
   --color-background-warning: rgba(250, 204, 21, 0.12);
   --color-background-danger: rgba(251, 113, 133, 0.12);
   --border-radius-md: 14px;
   --border-radius-lg: 18px;
+  --overlay-bg: rgba(0,0,0,0.4);
+}
+
+/* Light theme overrides when [data-theme="light"] is set on the root element */
+[data-theme="light"] {
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f3f4f6;
+  --color-background-tertiary: #ffffff;
+  --color-border-tertiary: rgba(15, 23, 42, 0.06);
+  --color-border-secondary: rgba(15, 23, 42, 0.08);
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #374151;
+  --color-text-tertiary: #6b7280;
+  --color-text-info: #2563eb;
+  --color-text-success: #15803d;
+  --color-text-warning: #b45309;
+  --color-text-danger: #c53030;
+  --color-background-info: rgba(37,99,235,0.08);
+  --color-background-success: rgba(16,185,129,0.08);
+  --color-background-warning: rgba(217,119,6,0.08);
+  --color-background-danger: rgba(197,48,48,0.08);
+  --overlay-bg: rgba(255,255,255,0.6);
 }
 
 *, *::before, *::after {
@@ -32,7 +58,7 @@ html, body, #root {
   margin: 0;
   padding: 0;
   font-family: var(--font-sans);
-  background: var(--color-background-tertiary);
+  background: linear-gradient(135deg, var(--color-background-tertiary) 0%, var(--color-background-primary) 100%);
   color: var(--color-text-primary);
 }
 
@@ -133,12 +159,17 @@ button {
 
 .nav-badge {
   margin-left: auto;
-  background: var(--color-background-danger);
-  color: var(--color-text-danger);
-  font-size: 10px;
-  font-weight: 500;
-  padding: 1px 6px;
-  border-radius: 10px;
+  background: #ff4d4f;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3);
 }
 
 .main {
@@ -199,6 +230,27 @@ button {
   opacity: 0.85;
 }
 
+/* Ensure primary buttons in the topbar are visible and icons inherit color */
+.topbar .btn.btn-primary {
+  background: var(--color-text-info) !important; /* blue */
+  color: var(--color-background-primary) !important; /* dark text */
+  border-color: transparent !important;
+  padding: 8px 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.topbar .btn.btn-primary i,
+.btn i {
+  color: inherit !important;
+  font-size: 14px;
+}
+
+.topbar .btn.btn-primary:hover {
+  filter: brightness(0.95) !important;
+}
+
 .btn-sm {
   padding: 5px 10px;
   font-size: 12px;
@@ -222,6 +274,8 @@ button {
   flex: 1;
   overflow-y: auto;
   padding: 24px;
+  background: linear-gradient(135deg, #0f172a 0%, #111827 100%) !important;
+  color: #f8fafc !important;
 }
 
 .card {
@@ -459,7 +513,7 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.4);
+  background: var(--overlay-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -521,6 +575,11 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 
 .alert-info { background: var(--color-background-info); color: var(--color-text-info); }
 
+/* Success and Danger alerts should use the defined variables for consistency */
+.alert-success { background: var(--color-background-success); color: var(--color-text-success); }
+
+.alert-danger { background: var(--color-background-danger); color: var(--color-text-danger); }
+
 .section-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 
 .section-title { font-size: 14px; font-weight: 500; }
@@ -552,3 +611,294 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 .empty-state { text-align: center; padding: 40px; color: var(--color-text-secondary); }
 
 .empty-state i { font-size: 40px; display: block; margin-bottom: 12px; opacity: 0.4; }
+
+/* Glass-card style for modern frosted glass effect */
+.glass-card {
+  background: rgba(17, 24, 39, 0.8) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(148, 163, 184, 0.15) !important;
+  border-radius: var(--border-radius-lg) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.glass-card .ant-card-head {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15) !important;
+}
+
+.glass-card .ant-card-body {
+  background: transparent !important;
+  color: var(--color-text-primary) !important;
+}
+
+.glass-card .ant-card-meta-title {
+  color: var(--color-text-primary) !important;
+}
+
+.glass-card .ant-card-meta-description {
+  color: var(--color-text-secondary) !important;
+}
+
+/* Ant Design overrides for dark theme */
+.ant-card {
+  background: var(--color-background-primary) !important;
+  border-color: var(--color-border-tertiary) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.ant-card-head {
+  background: transparent !important;
+  border-bottom-color: var(--color-border-tertiary) !important;
+}
+
+.ant-table {
+  background: transparent !important;
+  color: var(--color-text-primary) !important;
+}
+
+.ant-table-thead > tr > th {
+  background: transparent !important;
+  border-bottom-color: var(--color-border-tertiary) !important;
+  color: var(--color-text-secondary) !important;
+}
+
+.ant-table-tbody > tr {
+  background: transparent !important;
+  border-bottom-color: var(--color-border-tertiary) !important;
+}
+
+.ant-table-tbody > tr > td {
+  color: var(--color-text-primary) !important;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: var(--color-background-secondary) !important;
+}
+
+.ant-statistic-title {
+  color: var(--color-text-secondary) !important;
+}
+
+.ant-statistic-content {
+  color: var(--color-text-primary) !important;
+}
+
+.ant-list-item {
+  border-bottom-color: var(--color-border-tertiary) !important;
+}
+
+.ant-list-item-meta-title {
+  color: var(--color-text-primary) !important;
+}
+
+.ant-list-item-meta-description {
+  color: var(--color-text-secondary) !important;
+}
+
+/* Recharts custom styles */
+.recharts-surface {
+  background: transparent !important;
+}
+
+.recharts-cartesian-axis-tick-value {
+  fill: var(--color-text-secondary) !important;
+}
+
+.recharts-legend-wrapper {
+  color: var(--color-text-secondary) !important;
+}
+
+.recharts-legend-item-text {
+  color: var(--color-text-secondary) !important;
+}
+
+.recharts-tooltip-wrapper {
+  outline: none !important;
+}
+
+.recharts-default-tooltip {
+  background: rgba(0, 0, 0, 0.8) !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  border-radius: 8px !important;
+}
+
+/* Alert / Confirmation tweaks */
+.alert-danger { background: var(--color-text-danger); color: #fff; }
+
+/* Popconfirm (Ant Design) overrides to improve contrast on dark theme */
+.ant-popover-inner {
+  background: linear-gradient(180deg, rgba(17,24,39,0.98), rgba(17,24,39,0.95)) !important;
+  color: var(--color-text-primary) !important;
+  border: 0.5px solid var(--color-border-tertiary) !important;
+  border-radius: 12px !important;
+}
+
+.ant-popover-inner .ant-popover-inner-content,
+.ant-popconfirm-content {
+  background: transparent !important;
+  color: var(--color-text-primary) !important;
+}
+
+/* Buttons inside Popconfirm */
+.ant-popconfirm-buttons .ant-btn {
+  border-radius: 8px;
+  padding: 6px 12px;
+}
+
+.ant-popconfirm-buttons .ant-btn-danger,
+.ant-popconfirm-buttons .ant-btn-dangerous,
+.ant-btn-danger {
+  background: var(--color-action-danger) !important;
+  color: #fff !important;
+  border-color: var(--color-action-danger) !important;
+}
+
+.ant-popconfirm-buttons .ant-btn-default,
+.ant-btn-default {
+  background: var(--color-action-cancel) !important;
+  color: var(--color-text-primary) !important;
+  border-color: rgba(255,255,255,0.06) !important;
+}
+
+/* Primary confirm button (use success color) */
+.ant-popconfirm-buttons .ant-btn-primary,
+.ant-btn-primary {
+  background: var(--color-action-success) !important;
+  color: #fff !important;
+  border-color: var(--color-action-success) !important;
+}
+
+
+/* Flex utilities */
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ant Design message (toast) dark theme override */
+.ant-message .ant-message-notice .ant-message-notice-content,
+.ant-message-notice .ant-message-notice-content,
+.rc-notification .rc-notification-notice .rc-notification-notice-content,
+.ant-notification .ant-notification-notice .ant-notification-notice-content {
+  background: rgba(17, 24, 39, 0.95) !important;
+  color: var(--color-text-primary) !important;
+  border: 0.5px solid var(--color-border-tertiary) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6) !important;
+}
+
+.ant-message .ant-message-notice .ant-message-notice-content .anticon {
+  color: inherit !important;
+}
+
+/* Additional stronger selectors to catch different Ant versions and custom content */
+.ant-message-notice-content,
+.ant-notification-notice-content,
+.rc-notification-notice-content,
+.ant-message .ant-message-notice,
+.ant-notification .ant-notification-notice,
+.ant-message-notice .ant-message-custom-content,
+.ant-notification-notice .ant-notification-notice-message,
+.ant-message-notice .ant-notification-notice-message {
+  background: rgba(17,24,39,0.98) !important;
+  color: var(--color-text-primary) !important;
+  border: 0.5px solid var(--color-border-tertiary) !important;
+  border-radius: 10px !important;
+  padding: 10px 16px !important;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6) !important;
+  z-index: 9999 !important;
+}
+
+/* Ensure message text inside custom content is readable */
+.ant-message-notice-content .ant-message-custom-content,
+.ant-notification-notice-content .ant-notification-notice-message,
+.ant-notification-notice-content .ant-notification-notice-description {
+  color: var(--color-text-primary) !important;
+}
+
+/* Make sure the close icon / icon color inherits correctly */
+.ant-message-notice-content .anticon,
+.ant-notification-notice-content .anticon {
+  color: var(--color-text-primary) !important;
+}
+
+/* Broad Ant Design dark overrides to ensure readability for all users */
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-input:hover,
+.ant-input:focus,
+.ant-input-affix-wrapper:focus,
+.ant-input-affix-wrapper:hover,
+.ant-select-selector,
+.ant-select-selection-item,
+.ant-picker,
+.ant-select-item-option-content,
+.ant-input-number,
+.ant-input-number-handler-wrap {
+  background: rgba(0,0,0,0.16) !important;
+  color: var(--color-text-primary) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+/* Placeholder color */
+.ant-input::placeholder,
+.ant-input:-ms-input-placeholder,
+.ant-input::-ms-input-placeholder,
+.ant-input-affix-wrapper ::placeholder {
+  color: rgba(248,250,252,0.45) !important;
+}
+
+/* Form labels and help text */
+.ant-form-item-label > label,
+.ant-form-item-explain {
+  color: var(--color-text-secondary) !important;
+}
+
+/* Modal and drawer content */
+.ant-modal-content,
+.ant-drawer-content-wrapper,
+.ant-drawer-body {
+  background: var(--color-background-primary) !important;
+  color: var(--color-text-primary) !important;
+  border: 0.5px solid var(--color-border-tertiary) !important;
+}
+
+/* Dropdowns, selects and menus */
+.ant-select-dropdown,
+.ant-select-dropdown .ant-select-item,
+.ant-dropdown-menu,
+.ant-dropdown-menu-item {
+  background: var(--color-background-primary) !important;
+  color: var(--color-text-primary) !important;
+}
+
+/* Buttons */
+.ant-btn {
+  color: var(--color-text-primary) !important;
+  border-color: rgba(255,255,255,0.06) !important;
+  background: rgba(255,255,255,0.02) !important;
+}
+.ant-btn-primary {
+  color: var(--color-background-primary) !important;
+}
+
+/* Notifications */
+.ant-notification-notice,
+.ant-notification-notice-content {
+  background: rgba(17,24,39,0.95) !important;
+  color: var(--color-text-primary) !important;
+  border: 0.5px solid var(--color-border-tertiary) !important;
+}
+
+/* Tooltips */
+.ant-tooltip-inner {
+  background: rgba(0,0,0,0.8) !important;
+  color: var(--color-text-primary) !important;
+  border: 1px solid rgba(148,163,184,0.12) !important;
+}
+
+/* Ensure popover content is readable */
+.ant-popover-inner {
+  background: var(--color-background-primary) !important;
+  color: var(--color-text-primary) !important;
+}

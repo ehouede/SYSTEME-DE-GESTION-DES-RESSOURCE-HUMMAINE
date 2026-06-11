@@ -222,14 +222,21 @@ export default function Personnel() {
             onClick={() => downloadContract(record)}
             title="Télécharger le contrat"
           />
-          <Popconfirm
-            title="Confirmer la suppression ?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Oui"
-            cancelText="Non"
-          >
-            <Button icon={<DeleteOutlined />} size="small" danger />
-          </Popconfirm>
+          {currentUser && ["RH", "ADMIN"].includes(currentUser.role) && (
+            <Popconfirm
+              title="Confirmer la suppression de cet employé ?"
+              onConfirm={() => handleDelete(record.id)}
+              okText="Oui"
+              cancelText="Non"
+            >
+              <Button
+                danger
+                icon={<DeleteOutlined />}
+                size="small"
+                title="Supprimer"
+              />
+            </Popconfirm>
+          )}
         </div>
       ),
     },

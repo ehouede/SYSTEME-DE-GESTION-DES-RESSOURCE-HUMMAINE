@@ -1,19 +1,23 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { ConfigProvider, theme as antdTheme } from 'antd';
 import Sidebar from "./components/Sidebar";
 import ProtectedRoute from "./components/ProtectedRoute";
-import DashboardPage from "./pages/Dashboard";
-import LoginPage from "./pages/Login";
-import RegisterPage from "./pages/Register";
-import PersonnelPage from "./pages/Personnel";
-import PointagePage from "./pages/Pointage";
-import CongesPage from "./pages/Conges";
-import ObjectifsPage from "./pages/Objectifs";
-import NotificationsPage from "./pages/Notifications";
-import ValidationPage from "./pages/Validation";
-import HistoryPage from "./pages/History";
-import AbsencesPage from "./pages/Absences";
-import StatsPage from "./pages/Stats";
+
+// Lazy-load page components to reduce initial bundle size
+const DashboardPage = React.lazy(() => import("./pages/Dashboard"));
+const LoginPage = React.lazy(() => import("./pages/Login"));
+const RegisterPage = React.lazy(() => import("./pages/Register"));
+const PersonnelPage = React.lazy(() => import("./pages/Personnel"));
+const PointagePage = React.lazy(() => import("./pages/Pointage"));
+const CongesPage = React.lazy(() => import("./pages/Conges"));
+const ObjectifsPage = React.lazy(() => import("./pages/Objectifs"));
+const NotificationsPage = React.lazy(() => import("./pages/Notifications"));
+const ValidationPage = React.lazy(() => import("./pages/Validation"));
+const HistoryPage = React.lazy(() => import("./pages/History"));
+const AbsencesPage = React.lazy(() => import("./pages/Absences"));
+const StatsPage = React.lazy(() => import("./pages/Stats"));
+const RightsPage = React.lazy(() => import("./pages/Rights"));
 
 const titleMap = {
   "/dashboard": "Tableau de bord RH",
@@ -31,28 +35,18 @@ const titleMap = {
   "/objectifs": "Objectifs",
 };
 
-const placeholderContent = {
-  "/absences": "Suivez les absences et les justificatifs depuis cette interface.",
-  "/validation": "Validez les demandes de congé et les absences en attente.",
-  "/stats": "Visualisez les indicateurs RH, les tendances et les statistiques.",
-  "/history": "Consultez l'historique des demandes et des actions RH.",
-  "/rights": "Gérez les droits, quotas et règles de gestion des congés.",
-};
-
-function PlaceholderPage({ title, description }) {
-  return (
-    <div className="card">
-      <div className="section-title">{title}</div>
-      <p className="text-muted" style={{ marginTop: 12 }}>{description}</p>
-    </div>
-  );
-}
-
 const AppContent = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
+  const [types, setTypes] = useState([]);
+  const [typeId, setTypeId] = useState("");
+  const [dateStart, setDateStart] = useState(new Date().toISOString().split("T")[0]);
+  const [dateEnd, setDateEnd] = useState(new Date().toISOString().split("T")[0]);
+  const [motif, setMotif] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const userStr = localStorage.getItem("user");
@@ -65,22 +59,107 @@ const AppContent = () => {
     }
   }, []);
 
-  const pageTitle = titleMap[location.pathname] || "SGRH Suite";
+  useEffect(() => {
+    // Apply theme to root element via data-theme attribute and persist
+    try {
+      if (theme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+      }
+      localStorage.setItem('theme', theme);
+    } catch (e) {
+      console.error('Error applying theme', e);
+    }
+  }, [theme]);
+
+  useEffect(() => {
+    // Charger les types de congé pour le select
+    import("./api").then(({ default: api }) => {
+      api.get('/conges/types/').then(resp => {
+        setTypes(resp.data);
+        if (resp.data && resp.data.length > 0) setTypeId(resp.data[0].id);
+      }).catch(e => {
+        console.error('Erreur chargement types de congé', e);
+      });
+    });
+  }, []);
+
+  const handleSubmit = async () => {
+    if (!typeId) return alert('Veuillez choisir un type de congé.');
+    setSubmitting(true);
+    try {
+      const api = (await import('./api')).default;
+      // 1) créer la demande (Brouillon)
+      const payload = {
+        type_conge: typeId,
+        date_debut: dateStart,
+        date_fin: dateEnd,
+        motif: motif,
+      };
+      const createResp = await api.post('/conges/demandes/', payload);
+      const demande = createResp.data;
+      // 2) Appeler l'action soumettre
+      await api.post(`/conges/demandes/${demande.id}/soumettre/`);
+      alert('Demande soumise avec succès !');
+      // Réinitialiser et fermer modal
+      setModalOpen(false);
+      setMotif('');
+      setDateStart(new Date().toISOString().split('T')[0]);
+      setDateEnd(new Date().toISOString().split('T')[0]);
+    } catch (err) {
+      console.error(err);
+      const msg = err?.response?.data?.detail || err?.response?.data || err.message || 'Erreur lors de la soumission';
+      alert(String(msg));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const pageTitle = titleMap[location.pathname] || "BENIN-SERVICE SAS ";
   const showShell = location.pathname !== "/login" && location.pathname !== "/register";
 
   if (!showShell) {
     return (
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
+      <Suspense fallback={<div>Chargement...</div>}>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </Suspense>
     );
   }
 
   return (
-    <>
-      <div className="app">
+    <ConfigProvider
+      theme={{
+        algorithm: theme === 'light' ? antdTheme.defaultAlgorithm : antdTheme.darkAlgorithm,
+        token: theme === 'light' ? {
+          colorPrimary: '#5A67D8',
+          colorBgBase: '#ffffff',
+          colorBgContainer: '#ffffff',
+          colorBgElevated: '#f3f4f6',
+          colorBorder: 'rgba(15, 23, 42, 0.06)',
+          colorTextBase: '#0f172a',
+          colorTextSecondary: '#374151',
+          borderRadius: 14,
+          fontFamily: 'Inter, sans-serif',
+        } : {
+          colorPrimary: '#5A67D8',
+          colorBgBase: '#111827',
+          colorBgContainer: '#111827',
+          colorBgElevated: '#1f2937',
+          colorBorder: 'rgba(148, 163, 184, 0.2)',
+          colorTextBase: '#f8fafc',
+          colorTextSecondary: '#94a3b8',
+          borderRadius: 14,
+          fontFamily: 'Inter, sans-serif',
+        }
+      }}
+    >
+      <>
+        <div className="app">
         <Sidebar />
         <div className="main">
           <div className="topbar">
@@ -105,27 +184,37 @@ const AppContent = () => {
                   <i className="ti ti-plus"></i> Nouvelle demande
                 </button>
               )}
+              {/* Theme toggle button */}
+              <button
+                className="btn btn-sm"
+                title={theme === 'light' ? 'Activer le thème sombre' : 'Activer le thème clair'}
+                onClick={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
+              >
+                <i className={theme === 'light' ? 'ti ti-moon' : 'ti ti-sun'} style={{ fontSize: 16 }}></i>
+              </button>
               <div className="avatar" style={{ width: 34, height: 34 }}>DR</div>
             </div>
           </div>
           <div className="content">
-            <Routes>
-              <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-              <Route path="/personnel" element={<ProtectedRoute><PersonnelPage /></ProtectedRoute>} />
-              <Route path="/pointage" element={<ProtectedRoute><PointagePage /></ProtectedRoute>} />
-              <Route path="/conges" element={<ProtectedRoute><CongesPage /></ProtectedRoute>} />
-              <Route path="/leaves" element={<Navigate to="/conges" replace />} />
-              <Route path="/objectifs" element={<ProtectedRoute><ObjectifsPage /></ProtectedRoute>} />
-              <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
-              <Route path="/absences" element={<ProtectedRoute><AbsencesPage /></ProtectedRoute>} />
-              <Route path="/validation" element={<ProtectedRoute><ValidationPage /></ProtectedRoute>} />
-              <Route path="/stats" element={<ProtectedRoute><StatsPage /></ProtectedRoute>} />
-              <Route path="/history" element={<ProtectedRoute><HistoryPage /></ProtectedRoute>} />
-              <Route path="/rights" element={<ProtectedRoute><PlaceholderPage title="Droits & Quotas" description={placeholderContent["/rights"]} /></ProtectedRoute>} />
-              <Route path="/employees" element={<Navigate to="/personnel" replace />} />
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
-            </Routes>
+            <Suspense fallback={<div>Chargement...</div>}>
+              <Routes>
+                <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+                <Route path="/personnel" element={<ProtectedRoute><PersonnelPage /></ProtectedRoute>} />
+                <Route path="/pointage" element={<ProtectedRoute><PointagePage /></ProtectedRoute>} />
+                <Route path="/conges" element={<ProtectedRoute><CongesPage /></ProtectedRoute>} />
+                <Route path="/leaves" element={<Navigate to="/conges" replace />} />
+                <Route path="/objectifs" element={<ProtectedRoute><ObjectifsPage /></ProtectedRoute>} />
+                <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+                <Route path="/absences" element={<ProtectedRoute><AbsencesPage /></ProtectedRoute>} />
+                <Route path="/validation" element={<ProtectedRoute><ValidationPage /></ProtectedRoute>} />
+                <Route path="/stats" element={<ProtectedRoute><StatsPage /></ProtectedRoute>} />
+                <Route path="/history" element={<ProtectedRoute><HistoryPage /></ProtectedRoute>} />
+                <Route path="/rights" element={<ProtectedRoute><RightsPage /></ProtectedRoute>} />
+                <Route path="/employees" element={<Navigate to="/personnel" replace />} />
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              </Routes>
+            </Suspense>
           </div>
         </div>
       </div>
@@ -140,32 +229,26 @@ const AppContent = () => {
           </div>
           <div className="form-group">
             <label className="form-label">Type de congé</label>
-            <select className="form-control">
-              <option>Congé annuel</option>
-              <option>Congé maladie</option>
-              <option>Congé maternité / paternité</option>
-              <option>Congé sans solde</option>
-              <option>RTT</option>
-              <option>Congé exceptionnel</option>
+            <select className="form-control" value={typeId} onChange={e => setTypeId(e.target.value)}>
+              {types.length === 0 && <option value="">Chargement...</option>}
+              {types.map(t => (
+                <option key={t.id} value={t.id}>{t.nom}</option>
+              ))}
             </select>
           </div>
           <div className="form-grid">
             <div className="form-group">
               <label className="form-label">Date de début</label>
-              <input type="date" className="form-control" defaultValue={new Date().toISOString().split("T")[0]} />
+              <input type="date" className="form-control" value={dateStart} onChange={e => setDateStart(e.target.value)} />
             </div>
             <div className="form-group">
               <label className="form-label">Date de fin</label>
-              <input type="date" className="form-control" defaultValue={new Date().toISOString().split("T")[0]} />
+              <input type="date" className="form-control" value={dateEnd} onChange={e => setDateEnd(e.target.value)} />
             </div>
           </div>
           <div className="form-group">
             <label className="form-label">Motif / Commentaire</label>
-            <textarea className="form-control" placeholder="Précisez le motif de votre demande (optionnel)..."></textarea>
-          </div>
-          <div className="form-group">
-            <label className="form-label">Document justificatif</label>
-            <input type="file" className="form-control" style={{ padding: 6 }} />
+            <textarea className="form-control" placeholder="Précisez le motif de votre demande (optionnel)..." value={motif} onChange={e => setMotif(e.target.value)}></textarea>
           </div>
           <div className="alert alert-info" style={{ marginBottom: 16 }}>
             <i className="ti ti-info-circle"></i>
@@ -173,13 +256,14 @@ const AppContent = () => {
           </div>
           <div className="flex" style={{ justifyContent: "flex-end", gap: 8 }}>
             <button className="btn" onClick={() => setModalOpen(false)}>Annuler</button>
-            <button className="btn btn-primary" onClick={() => setModalOpen(false)}>
-              <i className="ti ti-send"></i> Soumettre
+            <button className="btn btn-primary" onClick={handleSubmit} disabled={submitting}>
+              <i className="ti ti-send"></i> {submitting ? 'Envoi...' : 'Soumettre'}
             </button>
           </div>
         </div>
       </div>
     </>
+    </ConfigProvider>
   );
 };
 
